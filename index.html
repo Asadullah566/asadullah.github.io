@@ -1,0 +1,439 @@
+Here’s **Checkpoint**, a gaming-advice website where you can read tips and write your own guides. I’ve used a modern, dark design in keeping with your previous website preferences.
+
+**Save the code below as `index.html` and open it in your browser.** It includes category filters, search, and a guide editor. Your guides are saved in your browser only; publishing them for everyone would require a backend.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkpoint — Gaming Advice</title>
+<style>
+:root {
+ --bg: #101410;
+ --panel: #1b221b;
+ --line: #354035;
+ --lime: #c6fb79;
+ --muted: #adb8a8;
+}
+* { box-sizing: border-box; }
+body {
+ margin: 0;
+ background: var(--bg);
+ color: #f5f7f0;
+ font: 16px/1.6 system-ui, sans-serif;
+}
+button, input, textarea, select { font: inherit; }
+button,.button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+button,.button {
+ background: var(--lime);
+ color: #172010;
+ border: 0;
+ border-radius: 9px;
+ padding: 12px 20px;
+ font-weight: 750;
+ display: inline-block;
+}
+header { border-bottom: 1px solid var(--line); }
+nav, main, footer {
+ max-width: 1150px;
+ margin: auto;
+ padding: 24px;
+}
+nav {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 20px;
+}
+.brand { font-weight: 900; letter-spacing: 2px; }
+.brand span { color: var(--lime); }
+.hero {
+ padding: 70px 0;
+ display: grid;
+ grid-template-columns: 1.2fr 1fr;
+ align-items: center;
+ gap: 45px;
+}
+.eyebrow {
+ color: var(--lime);
+ font-size: 12px;
+ font-weight: 750;
+ letter-spacing: 2px;
+}
+h1 {
+ font-size: clamp(48px, 7vw, 82px);
+ letter-spacing: -4px;
+ line-height: 1.04;
+ margin: 20px 0;
+}
+h1 span { color: var(--lime); }
+.hero p { max-width: 440px; color: var(--muted); }
+.hero.button { margin-top: 15px; }
+.art {
+ min-height: 330px;
+ border: 1px solid #53683e;
+ border-radius: 24px;
+ background: radial-gradient(circle, #455b2c, #172017 70%);
+ display: grid;
+ place-items: center;
+ position: relative;
+ overflow: hidden;
+}
+.art::before {
+ content: "";
+ width: 235px;
+ height: 235px;
+ border: 1px solid #92af66;
+ border-radius: 50%;
+ position: absolute;
+}
+.art strong {
+ color: var(--lime);
+ font-size: 155px;
+ text-shadow: 0 0 50px #c6fb7955;
+}
+.art small {
+ position: absolute;
+ bottom: 20px;
+ letter-spacing: 3px;
+ font-size: 11px;
+}
+.heading {
+ border-top: 1px solid var(--line);
+ padding-top: 35px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 20px;
+}
+h2 { margin: 5px 0; font-size: 30px; letter-spacing: -1px; }
+input, textarea, select {
+ background: #111810;
+ border: 1px solid var(--line);
+ color: white;
+ padding: 12px;
+ border-radius: 8px;
+}
+#search { width: 280px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 25px 0; }
+.filters button {
+ background: transparent;
+ border: 1px solid var(--line);
+ color: var(--muted);
+ border-radius: 30px;
+ padding: 7px 18px;
+ font-size: 13px;
+}
+.filters button.active { background: var(--lime); color: #172010; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card {
+ background: var(--panel);
+ border: 1px solid var(--line);
+ border-radius: 14px;
+ overflow: hidden;
+ transition: transform.2s, border-color.2s;
+}
+.card:hover { transform: translateY(-5px); border-color: #829957; }
+.cover {
+ height: 125px;
+ display: grid;
+ place-items: center;
+ font-size: 55px;
+ color: var(--lime);
+ background: linear-gradient(135deg, #354c32, #172219);
+}
+.card:nth-child(3n+2).cover {
+ background: linear-gradient(135deg, #49365f, #211c2e);
+}
+.card:nth-child(3n+3).cover {
+ background: linear-gradient(135deg, #664b32, #2e2419);
+}
+.content { padding: 22px; }
+.tag { color: var(--lime); font-size: 11px; letter-spacing: 2px; }
+h3 { font-size: 20px; line-height: 1.35; margin: 12px 0; }
+.content p { color: var(--muted); font-size: 14px; }
+.read { background: none; color: var(--lime); padding: 8px 0; font-size: 13px; }
+.banner {
+ background: linear-gradient(110deg, #29371e, #182017);
+ border: 1px solid #465737;
+ border-radius: 14px;
+ margin: 45px 0 20px;
+ padding: 30px;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 25px;
+}
+.banner p, footer,.note { color: var(--muted); }
+footer { font-size: 12px; border-top: 1px solid var(--line); }
+dialog {
+ width: min(600px, 92vw);
+ max-height: 85vh;
+ background: var(--panel);
+ color: white;
+ border: 1px solid #60744b;
+ border-radius: 16px;
+ padding: 28px;
+}
+dialog::backdrop { background: #000b; backdrop-filter: blur(5px); }
+.close { float: right; background: none; color: white; padding: 0 8px; font-size: 25px; }
+label { display: block; margin: 15px 0 6px; }
+form input, form textarea, form select { width: 100%; }
+textarea { min-height: 170px; resize: vertical; }
+.note { font-size: 12px; }
+#articleBody { white-space: pre-wrap; color: #ccd5c7; }
+:focus-visible { outline: 2px solid var(--lime); outline-offset: 4px; }
+@media (max-width: 750px) {
+.hero { grid-template-columns: 1fr; padding: 40px 0; }
+.art { min-height: 250px; }
+.grid { grid-template-columns: 1fr; }
+.heading,.banner { align-items: stretch; flex-direction: column; }
+ #search { width: 100%; }
+.brand { font-size: 13px; letter-spacing: 1px; }
+ nav button { font-size: 13px; padding: 10px 13px; }
+ h1 { letter-spacing: -2px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+ <nav>
+ <a class="brand" href="#"><span>✳</span> CHECKPOINT</a>
+ <button id="write">Write advice ↗</button>
+ </nav>
+</header>
+
+<main>
+ <section class="hero">
+ <div>
+ <div class="eyebrow">LESS GUESSWORK. BETTER GAMES.</div>
+ <h1>Your next level<br>starts <span>here.</span></h1>
+ <p>Practical advice for better habits, sharper strategy, and more enjoyable online gaming.</p>
+ <a class="button" href="#guides">Explore the playbook ↗</a>
+ </div>
+ <div class="art" aria-hidden="true">
+ <strong>✛</strong>
+ <small>FOCUS. ADAPT. PLAY AGAIN.</small>
+ </div>
+ </section>
+
+ <section id="guides">
+ <div class="heading">
+ <div>
+ <div class="eyebrow">THE PLAYBOOK</div>
+ <h2>Small changes. Better plays.</h2>
+ </div>
+ <input id="search" type="search" placeholder="Search gaming advice…" aria-label="Search guides">
+ </div>
+ <div class="filters" id="filters" aria-label="Guide categories"></div>
+ <div class="grid" id="cards"></div>
+ <p id="empty" hidden>No guides found. Try a different search.</p>
+ </section>
+
+ <section class="banner">
+ <div>
+ <div class="eyebrow">SHARE WHAT WORKS</div>
+ <h2>Got a tip worth sharing?</h2>
+ <p>Add your experience to your personal playbook.</p>
+ </div>
+ <button id="contribute">Write a guide ↗</button>
+ </section>
+</main>
+
+<footer>✳ CHECKPOINT · Independent gaming advice · Browser-only demo</footer>
+
+<dialog id="reader">
+ <button class="close" aria-label="Close guide">×</button>
+ <h2 id="articleTitle"></h2>
+ <p id="articleBody"></p>
+</dialog>
+
+<dialog id="editor">
+ <button class="close" aria-label="Close editor">×</button>
+ <h2>Share your next great tip.</h2>
+ <p class="note">Guides are saved on this browser, not published publicly.</p>
+ <form id="form">
+ <label for="title">Guide title</label>
+ <input id="title" required maxlength="100">
+
+ <label for="category">Category</label>
+ <select id="category">
+ <option>FPS</option>
+ <option>Strategy</option>
+ <option>Teamplay</option>
+ <option>Wellbeing</option>
+ </select>
+
+ <label for="body">Your advice</label>
+ <textarea id="body" required maxlength="10000"
+ placeholder="Explain your tip and how to try it…"></textarea>
+
+ <p class="note" id="status" role="status"></p>
+ <button type="submit">Save guide ↗</button>
+ </form>
+</dialog>
+
+<script>
+const $ = id => document.getElementById(id);
+const categories = ["All", "FPS", "Strategy", "Teamplay", "Wellbeing"];
+const icons = { FPS: "⌖", Strategy: "◈", Teamplay: "⚑", Wellbeing: "✳" };
+const starter = [
+ {
+ title: "Make every warm-up count",
+ category: "FPS",
+ body: "Pick one skill to practice before you queue: crosshair placement, tracking, or controlled movement.\n\nStart slowly and focus on consistent technique. Finish with a short practice round.\n\nYour warm-up is preparation, not a score you need to beat."
+ },
+ {
+ title: "Play the map, not just the fight",
+ category: "Strategy",
+ body: "Before a fight, consider your objective, available cover, and escape route.\n\nAsk what you gain by taking the fight. Sometimes regrouping is the more useful decision.\n\nAfter the match, review one positioning choice and plan an alternative."
+ },
+ {
+ title: "Clear calls beat loud calls",
+ category: "Teamplay",
+ body: "Share information your teammates can act on: location, what you observed, and your next action.\n\nSeparate confirmed information from guesses, and leave space for game audio.\n\nKeep feedback constructive. Discuss complicated decisions after the match."
+ },
+ {
+ title: "Reset before you requeue",
+ category: "Wellbeing",
+ body: "Check in with yourself after a frustrating game.\n\nIf you feel distracted or irritated, take a break instead of automatically starting another match.\n\nReturn when playing sounds enjoyable again."
+ },
+ {
+ title: "Review one decision at a time",
+ category: "Strategy",
+ body: "Choose one moment from your last match.\n\nWhat information did you have? What other options could you have tried?\n\nPick one small adjustment for your next session rather than trying to change everything at once."
+ },
+ {
+ title: "Make a plan with your team",
+ category: "Teamplay",
+ body: "Before a round, agree on a simple objective and how you will approach it.\n\nLet teammates know when your plan changes.\n\nIf a play fails, discuss the decision without blaming a person."
+ }
+];
+
+let saved = [];
+try {
+ const data = JSON.parse(localStorage.getItem("checkpoint-guides") || "[]");
+ if (Array.isArray(data)) {
+ saved = data.filter(g =>
+ g && ["title", "category", "body"].every(k => typeof g[k] === "string")
+ && categories.slice(1).includes(g.category)
+ );
+ }
+} catch {}
+
+let active = "All";
+
+function setCategory(category) {
+ active = category;
+ [...$("filters").children].forEach(button => {
+ const selected = button.textContent === active;
+ button.classList.toggle("active", selected);
+ button.setAttribute("aria-pressed", selected);
+ });
+ render();
+}
+
+categories.forEach(category => {
+ const button = document.createElement("button");
+ button.textContent = category;
+ button.onclick = () => setCategory(category);
+ $("filters").append(button);
+});
+
+function render() {
+ $("cards").replaceChildren();
+ const query = $("search").value.toLowerCase().trim();
+ const matches = [...saved,...starter].filter(g =>
+ (active === "All" || g.category === active) &&
+ `${g.title} ${g.body}`.toLowerCase().includes(query)
+ );
+
+ $("empty").hidden = matches.length > 0;
+
+ matches.forEach(guide => {
+ const card = document.createElement("article");
+ card.className = "card";
+
+ const cover = document.createElement("div");
+ cover.className = "cover";
+ cover.textContent = icons[guide.category];
+ cover.setAttribute("aria-hidden", "true");
+
+ const content = document.createElement("div");
+ content.className = "content";
+
+ const tag = document.createElement("div");
+ tag.className = "tag";
+ tag.textContent = guide.category.toUpperCase();
+
+ const title = document.createElement("h3");
+ title.textContent = guide.title;
+
+ const excerpt = document.createElement("p");
+ excerpt.textContent = guide.body.slice(0, 90) +
+ (guide.body.length > 90 ? "…" : "");
+
+ const read = document.createElement("button");
+ read.className = "read";
+ read.textContent = "Read guide ↗";
+ read.onclick = () => {
+ $("articleTitle").textContent = guide.title;
+ $("articleBody").textContent = guide.body;
+ $("reader").showModal();
+ };
+
+ content.append(tag, title, excerpt, read);
+ card.append(cover, content);
+ $("cards").append(card);
+ });
+}
+
+$("search").addEventListener("input", render);
+$("write").onclick = $("contribute").onclick = () => {
+ $("editor").showModal();
+};
+
+document.querySelectorAll(".close").forEach(button => {
+ button.onclick = () => button.closest("dialog").close();
+});
+
+$("form").onsubmit = event => {
+ event.preventDefault();
+
+ const title = $("title").value.trim();
+ const body = $("body").value.trim();
+
+ if (!title || !body) {
+ $("status").textContent = "Please enter a title and some advice.";
+ return;
+ }
+
+ const guide = { title, body, category: $("category").value };
+ const updated = [guide,...saved];
+
+ try {
+ localStorage.setItem("checkpoint-guides", JSON.stringify(updated));
+ } catch {
+ $("status").textContent =
+ "Browser storage is unavailable or full. Your guide was not saved.";
+ return;
+ }
+
+ saved = updated;
+ $("search").value = "";
+ setCategory("All");
+ $("form").reset();
+ $("status").textContent = "";
+ $("editor").close();
+ $("guides").scrollIntoView();
+};
+
+setCategory("All");
+</script>
+</body>
+</html>
+```
